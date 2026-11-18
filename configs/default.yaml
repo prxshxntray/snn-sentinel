@@ -1,0 +1,39 @@
+# Full synthetic run (still CPU-friendly). Swap data.source to nab or m100 for real data.
+seed: 0
+data:
+  source: synthetic
+  n_steps: 60000         # ~42 days at 1-minute resolution
+  n_racks: 8             # channels per rack: inlet_temp, outlet_temp, cpu_util, fan_speed, power
+  n_events: 120
+  event_types: [workload_spike, cooling_failure, hot_spot]
+  missing_sensor_prob: 0.0
+  train_frac: 0.6
+  val_frac: 0.2
+window: 32
+model:
+  snn:
+    hidden: 128
+    beta: 0.9
+    delta_threshold: 0.15   # send-on-delta encoder threshold (in z-scored units)
+    epochs: 20
+    lr: 0.005
+  gbt:
+    max_iter: 300
+    max_depth: 4
+  cusum:
+    k: 0.5
+    h: 6.0
+eval:
+  alarm_threshold: 0.5
+  min_alarm_gap: 10          # merge alarms closer than this many steps
+  steps_per_day: 1440
+energy:
+  # Per-op energies (pJ). Horowitz ISSCC 2014, 45 nm: 32-bit float MAC ~4.6 pJ (mult 3.7 + add 0.9), 32-bit float add 0.9 pJ.
+  # These are the conventional "SynOps x E_AC vs MACs x E_MAC" numbers; they ignore memory/data movement,
+  # which Yan et al. (arXiv:2409.08290) show can flip the conclusion. Treat as a lower bound, not a result.
+  e_mac_pj: 4.6
+  e_ac_pj: 0.9
+  # Loihi 2 per-synop energy: UNVERIFIED placeholder. Fill in from Intel/Orchard et al. measurements before quoting.
+  e_synop_loihi2_pj: null
+  spike_rate_threshold: 0.064   # Yan et al. v6: T in [5,10] needs avg spike rate < 6.4% to beat a capacity-matched QNN
+missing_sensor_eval: [0.0, 0.1, 0.2, 0.3, 0.5]   # fraction of channels dropped at test time

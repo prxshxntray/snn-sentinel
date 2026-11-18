@@ -1,0 +1,29 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "snn-sentinel"
+version = "0.0.1"
+description = "Event-driven spiking 'sentinel' for workload/thermal anomaly detection in data centres, benchmarked against classical and deep baselines on lead time, false alarms, missing-sensor robustness and inference energy."
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+  "numpy>=1.24",
+  "pandas>=2.0",
+  "scikit-learn>=1.3",
+  "torch>=2.1",
+  "snntorch>=0.9",
+  "pyyaml>=6.0",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=7"]
+data = ["pyarrow>=14"]          # M100 parquet files
+neuro = ["neurobench", "norse"]   # later: NeuroBench harness, Norse cross-check
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
